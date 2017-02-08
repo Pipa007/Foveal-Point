@@ -15,28 +15,26 @@
 #include <math.h>
 #include <limits>
 
-
+using namespace cv;
 using namespace std;
 using std::string;
 
 
-void downscale(cv::Mat &img, int scale){
+/*****************************************/
+//                  FUNCTIONS
+/*****************************************/
+void downscale(Mat &img, int scale){
 
     int s = scale;
-
-    //imshow("input image", img);
-    //cv::waitKey(5000);
 
     vector<int> param;
     param.push_back(CV_IMWRITE_PNG_COMPRESSION);
     param.push_back(9);
 
     while(s){
-        pyrDown(img,img,cv::Size(),4);
+        pyrDown(img,img,Size(),4);
         s--;
     }
-    //imshow("Down sampled",img);
-    //cv::waitKey(5000);
 }
 
 
@@ -50,17 +48,17 @@ int main(int argc, char** argv){
     // read one image
     string file = string(argv[1]) + "ILSVRC2012_val_00000001.JPEG";            // load image
 
-    cv::Mat img = cv::imread(file, -1);		 // Read image
+    Mat img = imread(file, -1);		 // Read image
 
     // Create kernel
-    cout << "Height: " << img.size().height << endl;
-    cout << "Width: " << img.size().width << endl;
-
     int height = img.size().height;
     int width = img.size().width;
 
-    // Fovea size: 3, 10 or 25
-    int sigma = 10;
+    cout << "Height: " << height << endl;
+    cout << "Width: " << width << endl;
+
+
+    int sigma = 10; // Fovea size: 3, 10 or 25
     int levels = 5; // number of pyramid levels
 
 
@@ -99,7 +97,15 @@ int main(int argc, char** argv){
 
     cout << img.size().height << "\n" << img.size().width << endl;
 
+
 // Initialize foveal stereo object
+
+// laplacian_mex_ = laplacian_interface(img, levels, kernel);
+
+
+
+
+
 
 
 }
@@ -109,8 +115,8 @@ int main(int argc, char** argv){
 /*
 
 
-%% Initialize foveal stereo object
-laplacian_mex_ = laplacian_interface(img, levels, kernel);
+
+
 
 pyramid={1,levels};
 
