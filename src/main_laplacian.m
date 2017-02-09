@@ -12,7 +12,7 @@ height=size(img,1);
 width=size(img,2);
 % img=rgb2gray(img);
 
-%  List Jpg files         
+%  List Jpg files
 myFolder = 'C:\Users\Bastos\Dropbox\thesis\Eye Tracking\images';
 filePattern = fullfile(myFolder, '*.jpg');
 jpgFiles = dir(filePattern);
