@@ -24,7 +24,7 @@ public:
     int levels;
     
     std::vector<Mat> kernels;
-    
+
     std::vector<Mat> imageLapPyr;
     std::vector<Mat> foveatedPyr;
     std::vector<cv::Mat> image_sizes;
@@ -50,13 +50,16 @@ public:
             imageLapPyr[l]=lap;
             
             currentImg = down;
-            //cout << "Level " << l << endl;
+            cout << "Level " << l << endl;
         }
         
         imageSmallestLevel=up;
         
     }
-    
+
+
+
+
 public:
     LaplacianBlending(const cv::Mat& _image,const int _levels, std::vector<Mat> _kernels):
         image(_image),levels(_levels), kernels(_kernels)
@@ -66,22 +69,22 @@ public:
             foveatedPyr.resize(levels);
             
             buildPyramids();
-//            image_sizes.resize(levels);
-//            kernel_sizes.resize(levels);
-//            for(int i=levels-1; i>=0;--i)
-//            {
-//                cv::Mat image_size(2,1,CV_32S);
+            image_sizes.resize(levels);
+            kernel_sizes.resize(levels);
+            for(int i=levels-1; i>=0;--i){
+
+                cv::Mat image_size(2,1,CV_32S);
                 
-//                image_size.at<int>(0,0)=imageLapPyr[i].cols;
-//                image_size.at<int>(1,0)=imageLapPyr[i].rows;
-//                image_sizes[i]=image_size;
+                image_size.at<int>(0,0)=imageLapPyr[i].cols;
+                image_size.at<int>(1,0)=imageLapPyr[i].rows;
+                image_sizes[i]=image_size;
                 
-//                cv::Mat kernel_size(2,1,CV_32S);
+                cv::Mat kernel_size(2,1,CV_32S);
                 
-//                kernel_size.at<int>(0,0)=kernels[i].cols;
-//                kernel_size.at<int>(1,0)=kernels[i].rows;
-//                kernel_sizes[i]=kernel_size;
-//            }
+                kernel_size.at<int>(0,0)=kernels[i].cols;
+                kernel_size.at<int>(1,0)=kernels[i].rows;
+                kernel_sizes[i]=kernel_size;
+            }
         };
         
         // COMPUTE ROIS
