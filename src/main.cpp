@@ -15,7 +15,7 @@
 #include <memory>
 #include <math.h>
 #include <limits>
-
+#include "laplacian_foveation.hpp"
 using namespace cv;
 using namespace std;
 using std::string;
@@ -58,67 +58,67 @@ void upsample(Mat &img){
 //                  CLASSES
 /*****************************************/
 
-class Foveate
-{
-public:
-    cv::Mat image;
+//class Foveate
+//{
+//public:
+//    cv::Mat image;
 
-    std::vector<Mat> kernels;
+//    std::vector<Mat> kernels;
 
-    std::vector<Mat> imageLapPyr;
-    std::vector<Mat> foveatedPyr;
-    std::vector<Mat> image_sizes;
-    std::vector<Mat> kernel_sizes;
+//    std::vector<Mat> imageLapPyr;
+//    std::vector<Mat> foveatedPyr;
+//    std::vector<Mat> image_sizes;
+//    std::vector<Mat> kernel_sizes;
 
-    Mat imageSmallestLevel;
-    Mat down,up;
-    Mat foveated_image;
+//    Mat imageSmallestLevel;
+//    Mat down,up;
+//    Mat foveated_image;
 
-    void buildPyramids(Mat& image, int levels);
-};
-
-
-
-/*****************************************/
-//        FUNCTIONS OF CLASSES
-/*****************************************/
-
-void Foveate::buildPyramids(Mat& image, int levels){
-
-    imageLapPyr.resize(levels);
+//    void buildPyramids(Mat& image, int levels);
+//};
 
 
-    imageLapPyr.clear();
-    Mat currentImg = image;
-    Mat lap = image;
 
-    imshow( "Input Image", currentImg );
-    cv::waitKey(2000);
+///*****************************************/
+////        FUNCTIONS OF CLASSES
+///*****************************************/
 
-    for (int l=0; l<levels; l++){
+//void Foveate::buildPyramids(Mat& image, int levels){
 
-        //Mat image;
-        pyrDown(currentImg, down);          // pyrDown(src, dst)
-        //imshow( "Down ", down );
-        //cv::waitKey(2000);
+//    imageLapPyr.resize(levels);
 
-        pyrUp(down, up, currentImg.size()); // pyrUp(src, dst)
-        //imshow( "Up ", up );
-        //cv::waitKey(2000);
 
-        Mat lap = currentImg - up;  // cv::subtract(currentImg, up, lap);
-        //imshow("difer", lap);
-        //cv::waitKey(2000);
+//    imageLapPyr.clear();
+//    Mat currentImg = image;
+//    Mat lap = image;
 
-        imageLapPyr[l] = lap;
-        //imwrite("files/level_1_lapPyr.jpg", imageLapPyr[0]);
-        currentImg = down;
-        cout << "iteration " << l << endl;
-    }
+//    imshow( "Input Image", currentImg );
+//    cv::waitKey(2000);
 
-    imageSmallestLevel=up;
+//    for (int l=0; l<levels; l++){
 
-}
+//        //Mat image;
+//        pyrDown(currentImg, down);          // pyrDown(src, dst)
+//        //imshow( "Down ", down );
+//        //cv::waitKey(2000);
+
+//        pyrUp(down, up, currentImg.size()); // pyrUp(src, dst)
+//        //imshow( "Up ", up );
+//        //cv::waitKey(2000);
+
+//        Mat lap = currentImg - up;  // cv::subtract(currentImg, up, lap);
+//        //imshow("difer", lap);
+//        //cv::waitKey(2000);
+
+//        imageLapPyr[l] = lap;
+//        //imwrite("files/level_1_lapPyr.jpg", imageLapPyr[0]);
+//        currentImg = down;
+//        cout << "iteration " << l << endl;
+//    }
+
+//    imageSmallestLevel=up;
+
+//}
 
 
 
@@ -133,8 +133,6 @@ int main(int argc, char** argv){
     int sigma = 10; // Fovea size: 3, 10 or 25
     int levels = 5; // number of pyramid levels
 
-    Foveate pyramid; //  instantiate an object
-
     // read one image
     string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";            // load image
 
@@ -147,12 +145,16 @@ int main(int argc, char** argv){
     cout << "Width: " << width << endl;
 
 
-    pyramid.buildPyramids(image,levels);
+    /*************************************/
+    //          Build kernels
+    std::vector<Mat> kernels;
 
 
-    pyramid.foveatedPyr.resize(levels);
+    // Construct pyramid
+    LaplacianBlending pyramid(image,levels, kernels); //  instantiate an object
 
-
+    // Foveate
+    //pyramid.foveate(center);
 
 }
 
