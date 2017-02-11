@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include <math.h>
+#include <cmath>
 #include <limits>
 
 #include "laplacian_foveation.hpp"
@@ -26,40 +27,52 @@ using std::string;
 /*****************************************/
 //                  FUNCTIONS
 /*****************************************/
-void createFilter(int m, int n, int sigma)
+Mat createFilter(int m, int n, int sigma)
 {
 
-    double kernels[m][n];
-
-    double r, s = 2.0 * sigma * sigma;
+    Mat gkernel(m,n,CV_64F);
 
     // sum is for normalization
     double sum = 0.0;
+    double r, s = 2.0 * sigma * sigma;
 
-    //
-    for (int x = -(floor(m/2)-1); x <= (floor(m/2)-1); x++) {
+    double xc=floor(m*0.5);
+    double yc=floor(n*0.5);
 
-        for(int y = -(floor(n/2)-1); y <= (floor(n/2)-1); y++) {
+    for (int x = 0; x < m; ++x) {
 
-            r = sqrt(x*x + y*y);
-            kernels[x + m/2-1][y + n/2-1] = (exp(-(r*r)/s))/(M_PI * s);
-            sum += kernels[x + m/2-1][y + n/2-1];
+        for(int y = 0; y < n; ++y) {
+
+            r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
+
+            gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
+
+            sum += gkernel.at<double>(x,y);
         }
     }
 
+
     // normalize the Kernel
-    for(int i = 0; i < floor(m); ++i)
-        for(int j = 0; j < floor(n); ++j)
-            kernels[i][j] /= sum;
+    for(int x = 0; x < m; ++x)
+        for(int y = 0; y < n; ++y)
+            gkernel.at<double>(x,y) /= sum;
 
-    for(int i = 0; i < floor(m); ++i)
-    {
-        for (int j = 0; j < floor(n); ++j)
 
-            cout << kernels[i][j] << "\t" <<endl;
+
+    for (int x = 0; x < m; ++x) {
+        for(int y = 0; y < n; ++y) {
+
+            cout << gkernel.at<double>(x,y) << "\t" <<endl;           
         }
+    }
 
+    imshow("Show kernel", gkernel);
+    waitKey(0);
 
+    // PROBLEMA: VER FORMULA MATEMATICA
+    // GOAL:     DESENHAR A GAUSSIANA!!!
+
+    return gkernel;
 }
 
 
@@ -70,7 +83,7 @@ void createFilter(int m, int n, int sigma)
 int main(int argc, char** argv){
 
     // Initialization
-    int sigma = 10; // Fovea size: 3, 10 or 25 (standard deviation)
+    int sigma = 10000; // Fovea size: standard deviation
     int levels = 5; // number of pyramid levels
 
     // read one image
@@ -85,49 +98,29 @@ int main(int argc, char** argv){
     cout << "Width: " << width << endl;
 
 
-    /*************************************/
-    //          Build kernels
-    /*************************************/
-    //std::vector<Mat> kernels;
-
+    std::vector<Mat> kernels;
 
     for (int l=0; l<levels; l++){ // for each level
 
-        int m = height*4/(powf(2, l));
-        int n = width*4/(powf(2, l));
+        int m = height/(powf(2, l));
+        int n = width/(powf(2, l));
         cout << "m " << m << " - n " << n << endl;
 
         // Build Kernel
-        createFilter(m,n,sigma);
-
+        Mat kernel = createFilter(m,n,sigma);
+        kernels.push_back(kernel);
     }
-
-
-    /* for (int i = 1; i <= levels; ++i) { // for each level
-
-         /*[h1, h2] = meshgrid(-(n-1)/2:(n-1)/2,-(m-1)/2:(m-1)/2);
-         hg = exp(- 0.5*(h1.^2+h2.^2) / (i*sigma).^2);
-
-         kernel_aux=0.1*ones(m,n,3);
-
-         kernel_aux(:,:,1)=hg ./ sum(hg(:));
-         kernel_aux(:,:,2)=kernel_aux(:,:,1);
-         kernel_aux(:,:,3)=kernel_aux(:,:,1);
-
-         % normalize
-         kernel_aux(:,:,1) =  kernel_aux(:,:,1)/max(max(abs(kernel_aux(:,:,1))));
-         kernel_aux(:,:,2) =  kernel_aux(:,:,2)/max(max(abs(kernel_aux(:,:,2))));
-         kernel_aux(:,:,3) =  kernel_aux(:,:,3)/max(max(abs(kernel_aux(:,:,3))));
-
-         kernel{i}=kernel_aux; */
-
-
 
     // Construct pyramid
     LaplacianBlending pyramid(image,levels, kernels); //  instantiate an object
 
-    // Foveate - Send vector with 5 centers per image (center of 5 bbox)
-    //pyramid.foveate(center);
+    // center = (0,0)
+    cv::Mat center(2,1,CV_64F);
+    center.at<double>(0,0)=width*0.5;
+    center.at<double>(1,0)=height*0.5;
+
+    // Foveate
+    pyramid.foveate(center);
 
 }
 

@@ -58,8 +58,6 @@ public:
     }
 
 
-
-
 public:
     LaplacianBlending(const cv::Mat& _image,const int _levels, std::vector<Mat> _kernels):
         image(_image),levels(_levels), kernels(_kernels)
@@ -71,6 +69,7 @@ public:
             buildPyramids();
             image_sizes.resize(levels);
             kernel_sizes.resize(levels);
+
             for(int i=levels-1; i>=0;--i){
 
                 cv::Mat image_size(2,1,CV_32S);
@@ -106,6 +105,7 @@ public:
         }
         
         // FOVEATE
+
         cv::Mat foveate(const cv::Mat & center)
         {
             imageSmallestLevel.copyTo(foveated_image);
@@ -137,6 +137,7 @@ public:
                 cv::Mat result_roi;
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
                 result_roi.copyTo(aux_pyr);
+
                 if(i==(levels-1))
                 {
                     add(foveated_image,aux_pyr,foveated_image);
