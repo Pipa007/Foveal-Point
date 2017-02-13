@@ -50,6 +50,8 @@ public:
             imageLapPyr[l]=lap;
             
             currentImg = down;
+            imshow("Laplaciano", lap);
+            waitKey(1500);
             //cout << "Level " << l << endl;
         }
         
@@ -70,6 +72,9 @@ public:
             image_sizes.resize(levels);
             kernel_sizes.resize(levels);
 
+            //cout << "size image "<< sizeof(image_sizes) << endl;
+            //cout << "size kernel "<< sizeof(kernel_sizes) << endl;
+
             for(int i=levels-1; i>=0;--i){
 
                 cv::Mat image_size(2,1,CV_64F); // CV_32S
@@ -85,43 +90,41 @@ public:
                 kernel_sizes[i]=kernel_size;
             }
         };
+
+
         
         // COMPUTE ROIS
-        void computeRois(const cv::Mat & center,
-                cv::Rect & kernel_roi_rect,
-                cv::Mat & kernel_size,
-                const cv::Mat & image_size)
+        void computeRois(const cv::Mat & center, cv::Rect & kernel_roi_rect,
+                         cv::Mat & kernel_size, const cv::Mat & image_size)
         {
+
             // Kernel center - image coordinate
             cv::Mat upper_left_kernel_corner=kernel_size/2.0-center;
 
-            //cout << "upper " << upper_left_kernel_corner << endl;
-
-            cv::Mat bottom_right_kernel_corner=image_size-center+kernel_size/2.0;
-            
-            //cout << "bottom " << bottom_right_kernel_corner << endl;
+            //cv::Mat bottom_right_kernel_corner=image_size-center+kernel_size/2.0;
+                       
 
             // encontrar roi no kernel
             // cv::Rect take (upper left corner, width, heigth)
-            kernel_roi_rect=cv::Rect(
-                    upper_left_kernel_corner.at<int>(0,0),
-                    upper_left_kernel_corner.at<int>(1,0),
-                    image_size.at<int>(0,0)-1,
-                    image_size.at<int>(1,0)-1);
+            kernel_roi_rect=cv::Rect(upper_left_kernel_corner.at<int>(0,0),
+                                     upper_left_kernel_corner.at<int>(1,0),
+                                     image_size.at<int>(0,0),
+                                     image_size.at<int>(1,0));
 
-            cout << "Image" << image_size.at<int>(0,0)-1 << "\t" << image_size.at<int>(1,0)-1 << endl;
-            cout << "Kernel" << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
+            cout << "Kernel roi rect " << kernel_roi_rect << endl;
+            cout << "Image: " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
+            cout << "Kernel: " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
         }
+
+
+
         
         // FOVEATE
-
         cv::Mat foveate(const cv::Mat & center)
         {
             imageSmallestLevel.copyTo(foveated_image);
             cv::Rect kernel_roi_rect;
             
-            cout << "\n Centro: " << center << "\n" << endl;
-
             for(int i=levels-1; i>=0;--i){
 
                 cv::Rect image_roi_rect;
@@ -141,29 +144,15 @@ public:
 
                 computeRois(aux,kernel_roi_rect,kernel_sizes[i],image_sizes[i]);
                 
-                cout << "kernel rect  " << kernel_roi_rect << endl;
-                cout << "\n" << endl;
-                cout << "Image size   " << image_sizes[0] << endl;
-                cout << "Kernel size   " << kernel_sizes[0] << endl;
-                cout << "\n" << endl;
-                cout << "Image size1   " << image_sizes[1] << endl;
-                cout << "Kernel size   " << kernel_sizes[1] << endl;
-                cout << "\n" << endl;
-                cout << "Image size2   " << image_sizes[2] << endl;
-                cout << "Kernel size   " << kernel_sizes[2] << endl;
-                cout << "\n" << endl;
-                cout << "Image size3   " << image_sizes[3] << endl;
-                cout << "Kernel size   " << kernel_sizes[3] << endl;
-
 
                 // Multiplicar
                 cv::Mat aux_pyr;
                 imageLapPyr[i].copyTo(aux_pyr);
                 cv::Mat result_roi;
 
-
-
-
+                cout << "size aux_pyr " << sizeof(aux_pyr) << endl;
+                cout << "size kernel roi " << sizeof(kernels[i](kernel_roi_rect)) << endl;
+                cout << "size result " << sizeof(result_roi) << endl;
 
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
                 cout << "Mult " << endl;
