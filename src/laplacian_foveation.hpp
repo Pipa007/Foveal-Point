@@ -50,8 +50,8 @@ public:
             imageLapPyr[l]=lap;
             
             currentImg = down;
-            imshow("Laplaciano", lap);
-            waitKey(1500);
+            //imshow("Laplaciano", lap);
+            //waitKey(1500);
             //cout << "Level " << l << endl;
         }
         
@@ -112,8 +112,8 @@ public:
                                      image_size.at<int>(1,0));
 
             cout << "Kernel roi rect " << kernel_roi_rect << endl;
-            cout << "Image: " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
-            cout << "Kernel: " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
+            cout << "Image size : " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
+            cout << "Kernel size : " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
         }
 
 
@@ -155,7 +155,6 @@ public:
                 cout << "size result " << sizeof(result_roi) << endl;
 
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
-                cout << "Mult " << endl;
 
                 result_roi.copyTo(aux_pyr);
 
@@ -172,7 +171,7 @@ public:
             }
 
             imshow("Foveated image", foveated_image);
-            waitKey(0);
+            waitKey(4000);
 
             return foveated_image;
         }
