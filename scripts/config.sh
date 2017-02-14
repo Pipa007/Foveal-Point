@@ -34,6 +34,6 @@ DATASET="files/"
 
 
 # /home/filipa/Documents/Foveated_YOLT/files/ deploy_caffenet.prototxt bvlc_caffenet.caffemodel imagenet_mean.binaryproto val.txt
-build/main $FILES_FOLDER_ABSOLUTE_PATH
-#build/test_kernel $FILES_FOLDER_ABSOLUTE_PATH
+#build/main $FILES_FOLDER_ABSOLUTE_PATH
+build/test_main $FILES_FOLDER_ABSOLUTE_PATH
 #$GPU_ID

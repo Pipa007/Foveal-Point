@@ -55,8 +55,7 @@ Mat createFilter(int m, int n, int sigma){
     }
 
     imshow("Show kernel", gkernel);
-    waitKey(1500);
-
+    waitKey(1000);
 
     // normalize the Kernel
     for(int x = 0; x < m; ++x)
@@ -80,6 +79,7 @@ Mat createFilter(int m, int n, int sigma){
 }
 
 
+
 /*****************************************/
 //		MAIN
 /*****************************************/
@@ -95,7 +95,7 @@ int main(int argc, char** argv){
     string file = string(argv[1]) + "quarto.jpg";
 
     Mat image = imread(file, -1);		 // Read image
-
+    cout << sizeof(image) << endl;
     //cv::normalize(image, image,1,0,NORM_MINMAX);
 
     int height = image.size().height;
@@ -114,7 +114,7 @@ int main(int argc, char** argv){
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
-        Mat kernel = createFilter(m,n,sigma);
+        Mat kernel = createFilter(m,n,l*sigma);
         kernels.push_back(kernel);
     }
 

@@ -39,13 +39,13 @@ Mat createFilter(int m, int n, int sigma){
     double yc= floor(n*0.5);
 
     for (int x = 0; x < m; ++x) {
-
+        rx = ((x-xc)*(x-xc));
         for(int y = 0; y < n; ++y) {
 
             //r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
             //gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
 
-            rx = ((x-xc)*(x-xc));
+
             ry = ((y-yc)*(y-yc));
 
 //            // FOR ONE CHANNEL
@@ -54,9 +54,9 @@ Mat createFilter(int m, int n, int sigma){
 
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(x,y)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[0] = exp(-(rx + ry)/s)*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[1] = exp(-(rx + ry)/s)*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[2] = exp(-(rx + ry)/s)*(1/(M_PI*s));
 
             // Acumulate kernel values
             sum += gkernel.at<Vec3f>(x,y)[0];
@@ -129,11 +129,10 @@ int main(int argc, char** argv){
     int levels = 5; // number of pyramid levels
 
     // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
-    string file = string(argv[1]) + "quarto.jpg";
+    string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
+    //string file = string(argv[1]) + "quarto.jpg";
 
     Mat image = imread(file, -1);		 // Read image
-    cout << sizeof(image) << endl;
 
     int height = image.size().height;
     int width = image.size().width;
@@ -146,8 +145,8 @@ int main(int argc, char** argv){
 
     for (int l=0; l<levels; ++l){ // for each level
 
-        int m = height/(powf(2, l));
-        int n = width/(powf(2, l));
+        int m = ceil(height/(powf(2, l)));
+        int n = ceil(width/(powf(2, l)));
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
@@ -160,8 +159,8 @@ int main(int argc, char** argv){
 
     // center
     cv::Mat center(2,1,CV_64F);
-    center.at<double>(0,0)= height*0.5;
-    center.at<double>(1,0)= width*0.5;
+    center.at<double>(0,0)= ceil(height*0.5);
+    center.at<double>(1,0)= ceil(width*0.5);
     cout << "\n Centro: " << center << "\n" << endl;
 
     // Foveate

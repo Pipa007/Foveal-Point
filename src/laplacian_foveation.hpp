@@ -44,12 +44,13 @@ public:
             Mat image;
             pyrDown(currentImg, down);
             pyrUp(down, up, currentImg.size());
-            
+            cout << " " << currentImg.size() << endl;
             Mat lap = currentImg - up;
             
             imageLapPyr[l]=lap;
             
             currentImg = down;
+
             //imshow("Laplaciano", lap);
             //waitKey(1500);
             //cout << "Level " << l << endl;
@@ -150,21 +151,26 @@ public:
                 imageLapPyr[i].copyTo(aux_pyr);
                 cv::Mat result_roi;
 
-                cout << "size aux_pyr " << sizeof(aux_pyr) << endl;
-                cout << "size kernel roi " << sizeof(kernels[i](kernel_roi_rect)) << endl;
-                cout << "size result " << sizeof(result_roi) << endl;
+                cout << "size aux_pyr " << aux_pyr.size() << "\n" << endl;
+                cout << "size kernel roi " << kernels[i](kernel_roi_rect).size() << "\n" << endl;
+                cout << "size result " << result_roi.size() << "\n" << endl;
 
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
-
+                cout << "mult" << endl;
                 result_roi.copyTo(aux_pyr);
 
                 if(i==(levels-1)) {
                     add(foveated_image,aux_pyr,foveated_image);
+                    cout << "tou no if " << foveated_image.size() << "\n" << endl;
                 }
                 
                 else {
-                    
-                    pyrUp(foveated_image,foveated_image,cv::Size(2*foveated_image.cols,2*foveated_image.rows));
+                    cout << "tou no else" << endl;
+                    cout << "first " << foveated_image.size().height << "\t" << foveated_image.size().width
+                         << "\t" << foveated_image.size() << "\n" << endl;
+
+                    // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
+                    pyrUp(foveated_image, foveated_image, Size(2*foveated_image.cols,2*foveated_image.rows));
                     //resize(foveated_image, foveated_image, cv::Size(2*foveated_image.cols,2*foveated_image.rows), 0, 0, 0);
                     cv::add(foveated_image,aux_pyr,foveated_image);
                 }
