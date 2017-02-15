@@ -38,13 +38,23 @@ public:
     {
         imageLapPyr.clear();
         Mat currentImg = image;
+        imshow("IMAGE ", image);
+        waitKey(500);
         
         for (int l=0; l<levels; l++)
         {
             Mat image;
             pyrDown(currentImg, down);
+            //imshow("IMAGE ", currentImg);
+            //waitKey(1500);
+
+            //imshow("PYRDOWN", down);
+            //waitKey(1500);
             pyrUp(down, up, currentImg.size());
-            cout << " " << currentImg.size() << endl;
+
+            //imshow("PYRUP", up);
+            //waitKey(1500);
+
             Mat lap = currentImg - up;
             
             imageLapPyr[l]=lap;
@@ -65,16 +75,14 @@ public:
     LaplacianBlending(const cv::Mat& _image,const int _levels, std::vector<Mat> _kernels):
         image(_image),levels(_levels), kernels(_kernels)
         {
-            image.convertTo(image,CV_64F);
+
+            //image.convertTo(image,CV_64F);
             imageLapPyr.resize(levels);
             foveatedPyr.resize(levels);
-            
+
             buildPyramids();
             image_sizes.resize(levels);
             kernel_sizes.resize(levels);
-
-            //cout << "size image "<< sizeof(image_sizes) << endl;
-            //cout << "size kernel "<< sizeof(kernel_sizes) << endl;
 
             for(int i=levels-1; i>=0;--i){
 
@@ -126,7 +134,7 @@ public:
             imageSmallestLevel.copyTo(foveated_image);
             cv::Rect kernel_roi_rect;
             
-            for(int i=levels-1; i>=0;--i){
+            for(int i=levels-1; i>=0; --i){
 
                 cv::Rect image_roi_rect;
                 cv::Rect kernel_roi_rect;
@@ -155,29 +163,49 @@ public:
                 cout << "size kernel roi " << kernels[i](kernel_roi_rect).size() << "\n" << endl;
                 cout << "size result " << result_roi.size() << "\n" << endl;
 
+                cout << "multiplicacao" << endl;
+
+                cout << "Type kernel " << kernels[i](kernel_roi_rect).type() << endl;
+
+
+                aux_pyr.convertTo(aux_pyr,CV_64F);
+                cout << "Type aux pyr " << aux_pyr.type() << endl;
+
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
-                cout << "mult" << endl;
+                cout << "boa multiplicacao" << endl;
+
+
+
                 result_roi.copyTo(aux_pyr);
 
+
+                cout << "Type foveated image " << foveated_image.type() << endl;
+                foveated_image.convertTo(foveated_image,CV_64F);
+                cout << "Type foveated image " << foveated_image.type() << endl;
+
+
                 if(i==(levels-1)) {
+
                     add(foveated_image,aux_pyr,foveated_image);
-                    cout << "tou no if " << foveated_image.size() << "\n" << endl;
+                    cout << "tou no if " << endl;
+                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
                 }
-                
+
                 else {
                     cout << "tou no else" << endl;
-                    cout << "first " << foveated_image.size().height << "\t" << foveated_image.size().width
-                         << "\t" << foveated_image.size() << "\n" << endl;
+                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
 
                     // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
                     pyrUp(foveated_image, foveated_image, Size(2*foveated_image.cols,2*foveated_image.rows));
-                    //resize(foveated_image, foveated_image, cv::Size(2*foveated_image.cols,2*foveated_image.rows), 0, 0, 0);
+
                     cv::add(foveated_image,aux_pyr,foveated_image);
                 }
+
             }
+            cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
 
             imshow("Foveated image", foveated_image);
-            waitKey(4000);
+            waitKey(0);
 
             return foveated_image;
         }

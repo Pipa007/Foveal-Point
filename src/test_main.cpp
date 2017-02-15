@@ -35,28 +35,30 @@ Mat createFilter(int m, int n, int sigma){
     double sum = 0.0;  // for normalization
     double r,rx, ry, s = 2.0 * sigma * sigma;
 
-    double xc= floor(m*0.5);
-    double yc= floor(n*0.5);
+    double xc= ceil(m*0.5);
+    double yc= ceil(n*0.5);
 
     for (int x = 0; x < m; ++x) {
         rx = ((x-xc)*(x-xc));
+
         for(int y = 0; y < n; ++y) {
 
             //r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
             //gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
 
-
             ry = ((y-yc)*(y-yc));
 
-//            // FOR ONE CHANNEL
-//            //kernel.at<double>(x,y) = exp(-(rx + ry)/s) ;//*(1/(M_PI*s));
-//            //sum += kernel.at<double>(x,y);
+
+            // FOR ONE CHANNEL
+//            kernel.at<double>(x,y) = exp(-(rx + ry)/s)*(1/(M_PI*s));
+//            sum += kernel.at<double>(x,y);
 
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(x,y)[0] = exp(-(rx + ry)/s)*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[1] = exp(-(rx + ry)/s)*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[2] = exp(-(rx + ry)/s)*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(x,y)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+
 
             // Acumulate kernel values
             sum += gkernel.at<Vec3f>(x,y)[0];
@@ -109,8 +111,8 @@ Mat createFilter(int m, int n, int sigma){
 //        }
 //    }
 
-    imshow("Show kernel", gkernel);
-    waitKey(2000);
+    //imshow("Show kernel", gkernel);
+    //waitKey(2000);
 
 
     return gkernel;
@@ -125,21 +127,22 @@ Mat createFilter(int m, int n, int sigma){
 int main(int argc, char** argv){
 
     // Initialization
-    int sigma = 100; // Fovea size: standard deviation
+    int sigma = 10; // Fovea size: standard deviation
     int levels = 5; // number of pyramid levels
 
     // read one image
-    string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
-    //string file = string(argv[1]) + "quarto.jpg";
+    //string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
+    string file = string(argv[1]) + "quarto.jpg";
 
-    Mat image = imread(file, -1);		 // Read image
+    cv::Mat image = imread(file, -1);		 // Read image
 
     int height = image.size().height;
     int width = image.size().width;
 
     cout << "Height: " << height << endl;
     cout << "Width: " << width << endl;
-
+    //imshow("Input Image ", image);
+    //waitKey(1500);
 
     std::vector<Mat> kernels;
 
