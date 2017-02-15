@@ -163,25 +163,14 @@ public:
                 cout << "size kernel roi " << kernels[i](kernel_roi_rect).size() << "\n" << endl;
                 cout << "size result " << result_roi.size() << "\n" << endl;
 
-                cout << "multiplicacao" << endl;
-
-                cout << "Type kernel " << kernels[i](kernel_roi_rect).type() << endl;
-
 
                 aux_pyr.convertTo(aux_pyr,CV_64F);
-                cout << "Type aux pyr " << aux_pyr.type() << endl;
 
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
-                cout << "boa multiplicacao" << endl;
-
-
 
                 result_roi.copyTo(aux_pyr);
 
-
-                cout << "Type foveated image " << foveated_image.type() << endl;
                 foveated_image.convertTo(foveated_image,CV_64F);
-                cout << "Type foveated image " << foveated_image.type() << endl;
 
 
                 if(i==(levels-1)) {
@@ -196,14 +185,14 @@ public:
                     cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
 
                     // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
-                    pyrUp(foveated_image, foveated_image, Size(2*foveated_image.cols,2*foveated_image.rows));
+                    pyrUp(foveated_image, foveated_image, Size(foveated_image.cols*2,foveated_image.rows*2));
 
                     cv::add(foveated_image,aux_pyr,foveated_image);
                 }
 
             }
             cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
-
+            //imwrite("files/Foveated/foveated_wc.jpg", foveated_image);
             imshow("Foveated image", foveated_image);
             waitKey(0);
 

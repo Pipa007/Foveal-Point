@@ -131,8 +131,8 @@ int main(int argc, char** argv){
     int levels = 5; // number of pyramid levels
 
     // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
-    string file = string(argv[1]) + "quarto.jpg";
+    //string file = string(argv[1]) + "ILSVRC2012_val_00000003.JPEG";   // load image
+    string file = string(argv[1]) + "wc.jpg";
 
     cv::Mat image = imread(file, -1);		 // Read image
 
@@ -148,8 +148,8 @@ int main(int argc, char** argv){
 
     for (int l=0; l<levels; ++l){ // for each level
 
-        int m = ceil(height/(powf(2, l)));
-        int n = ceil(width/(powf(2, l)));
+        int m = ceil(height*4/(powf(2, l)));
+        int n = ceil(width*4/(powf(2, l)));
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
