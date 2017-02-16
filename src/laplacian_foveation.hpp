@@ -36,15 +36,32 @@ public:
 
     void buildPyramids()
     {
+
         imageLapPyr.clear();
+
+//        double max_value=-std::numeric_limits<double>::max();
+
+//        for (int i = 0; i<= image.size().height; ++i){
+//              for (int j = 0; j<= image.size().width; ++j){
+//                if (image.at<double>(i,j) > max_value){
+//                    max_value=image.at<double>(i,j);
+
+//                }
+//            }
+//        }
+
         Mat currentImg = image;
-        imshow("IMAGE ", image);
-        waitKey(500);
-        
+        //// CONVERTER PARA CV_8UC3 PARA REPRESENTAR!!
+        //image.convertTo(image, CV_8UC3);
+        //imshow("IMAGE ", image);
+        //waitKey(500);
+
+
         for (int l=0; l<levels; l++)
         {
             Mat image;
             pyrDown(currentImg, down);
+
             //imshow("IMAGE ", currentImg);
             //waitKey(1500);
 
@@ -193,6 +210,8 @@ public:
             }
             cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
             //imwrite("files/Foveated/foveated_wc.jpg", foveated_image);
+
+            foveated_image.convertTo(foveated_image, CV_8UC3);
             imshow("Foveated image", foveated_image);
             waitKey(0);
 

@@ -1,0 +1,8 @@
+build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c
+build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp
+build/CMakeFiles/feature_tests.c
+build/CMakeFiles/feature_tests.cxx
+src/laplacian_foveation.hpp
+src/main.cpp
+src/test_kernel.cpp
+src/test_main.cpp

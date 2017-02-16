@@ -29,19 +29,20 @@ using std::string;
 /*****************************************/
 Mat createFilter(int m, int n, int sigma){
 
-    Mat kernel(m,n,CV_64F);
-    Mat gkernel(m,n,CV_64FC3,Scalar(0.1));
+    std::cout << "m:"<< m << "n: "<< n << std::endl;
+    //Mat kernel(m,n,CV_64F);
+    Mat gkernel(m,n,CV_64FC3);
 
-    double sum = 0.0;  // for normalization
     double r,rx, ry, s = 2.0 * sigma * sigma;
 
-    double xc= ceil(m*0.5);
-    double yc= ceil(n*0.5);
+    double xc= n*0.5;
+    double yc= m*0.5;
+    double max_value=-std::numeric_limits<double>::max();
 
-    for (int x = 0; x < m; ++x) {
+    for (int x = 0; x < n; ++x) {
         rx = ((x-xc)*(x-xc));
 
-        for(int y = 0; y < n; ++y) {
+        for(int y = 0; y < m; ++y) {
 
             //r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
             //gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
@@ -55,52 +56,70 @@ Mat createFilter(int m, int n, int sigma){
 
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(x,y)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(x,y)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(y,x)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(y,x)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3f>(y,x)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
 
+//            gkernel.at<Vec3f>(y,x)[0] = 0.0;//*(1/(M_PI*s));
+//            gkernel.at<Vec3f>(y,x)[1] = 0.0;//*(1/(M_PI*s));
+//            gkernel.at<Vec3f>(y,x)[2] = 0.0;//*(1/(M_PI*s));
 
-            // Acumulate kernel values
-            sum += gkernel.at<Vec3f>(x,y)[0];
-            sum += gkernel.at<Vec3f>(x,y)[1];
-            sum += gkernel.at<Vec3f>(x,y)[2];
+            if(gkernel.at<Vec3f>(y,x)[0]>max_value)
+            {
+                max_value=gkernel.at<Vec3f>(y,x)[0];
+            }
 
+//            if(sqrt((x-xc)*(x-xc)+(y-yc)*(y-yc))<100)
+//            {
+//                gkernel.at<Vec3f>(y,x)[0] = 1.0;//*(1/(M_PI*s));
+//                gkernel.at<Vec3f>(y,x)[1] = 1.0;//*(1/(M_PI*s));
+//                gkernel.at<Vec3f>(y,x)[2] = 1.0;//*(1/(M_PI*s));
+//            }
+//            else
+//            {
+//                gkernel.at<Vec3f>(y,x)[0] = 0.0;//*(1/(M_PI*s));
+//                gkernel.at<Vec3f>(y,x)[1] = 0.0;//*(1/(M_PI*s));
+//                gkernel.at<Vec3f>(y,x)[2] = 0.0;//*(1/(M_PI*s));
+//           }
 
-//            // Miguel:
-//            kernel.at<double>(x,y) = exp(-(rx + ry)/s) ;//*(1/(M_PI*s));   // hg
-//            sum += kernel.at<double>(x,y);
+            //std::cout << -(rx + ry)/s <<  " " ;
 
-//            gkernel.at<Vec3f>(x,y)[0] = kernel.at<double>(x,y) / sum;
-//            gkernel.at<Vec3f>(x,y)[1] = gkernel.at<Vec3f>(x,y)[0];
-//            gkernel.at<Vec3f>(x,y)[2] = gkernel.at<Vec3f>(x,y)[0];
 
 
 
         }
     }
 
+    //std::cout << max_value << std::endl;
     //imshow("Show kernel", gkernel);
     //waitKey(2000);
 
 
     // normalize the Kernel
-    for(int x = 0; x < m; ++x){
-        for(int y = 0; y < n; ++y){
+    for(int x = 0; x < n; ++x){
+        for(int y = 0; y < m; ++y){
             // FOR ONE CHANNEL
             //gkernel.at<double>(x,y) /= sum;
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(x,y)[0] /= sum;
-            gkernel.at<Vec3f>(x,y)[1] /= sum;
-            gkernel.at<Vec3f>(x,y)[2] /= sum;
+            gkernel.at<Vec3f>(y,x)[0] /= max_value;
+            gkernel.at<Vec3f>(y,x)[1] /= max_value;
+            gkernel.at<Vec3f>(y,x)[2] /= max_value;
+
+            gkernel.at<Vec3f>(y,x)[0] *= 20.0;
+            gkernel.at<Vec3f>(y,x)[1] *= 20.0;
+            gkernel.at<Vec3f>(y,x)[2] *= 20.0;
 
 
+            if(abs(x-xc)<10&&abs(y-yc)<10)
+            std::cout << gkernel.at<Vec3f>(y,x)[0] << " "<< std::endl;
 //            gkernel.at<Vec3f>(x,y)[0] = gkernel.at<Vec3f>(x,y)[0] / abs(gkernel.at<Vec3f>(x,y)[0] );
 //            gkernel.at<Vec3f>(x,y)[1] = gkernel.at<Vec3f>(x,y)[1] / abs(gkernel.at<Vec3f>(x,y)[1] );
 //            gkernel.at<Vec3f>(x,y)[2] = gkernel.at<Vec3f>(x,y)[2] / abs(gkernel.at<Vec3f>(x,y)[2] );
 
          }
     }
+
 
 
 //    for (int x = 0; x < m; ++x) {
@@ -110,10 +129,11 @@ Mat createFilter(int m, int n, int sigma){
 //            cout << "\t" <<endl;
 //        }
 //    }
-
-    //imshow("Show kernel", gkernel);
-    //waitKey(2000);
-
+    ////CONVERTER PARA REPRESENTAR
+    gkernel.convertTo(gkernel, CV_8UC3);
+    imshow("Show kernel", gkernel.t());
+    waitKey(0);
+    gkernel.convertTo(gkernel, CV_64FC3);
 
     return gkernel;
 }
@@ -131,8 +151,8 @@ int main(int argc, char** argv){
     int levels = 5; // number of pyramid levels
 
     // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00000003.JPEG";   // load image
-    string file = string(argv[1]) + "wc.jpg";
+    //string file = string(argv[1]) + "ILSVRC2012_val_00000001.JPEG";   // load image
+    string file = string(argv[1]) + "quarto.jpg";
 
     cv::Mat image = imread(file, -1);		 // Read image
 
@@ -144,16 +164,17 @@ int main(int argc, char** argv){
     //imshow("Input Image ", image);
     //waitKey(1500);
 
+    image.convertTo(image, CV_64F);
     std::vector<Mat> kernels;
 
     for (int l=0; l<levels; ++l){ // for each level
-
-        int m = ceil(height*4/(powf(2, l)));
-        int n = ceil(width*4/(powf(2, l)));
+        float aux=powf(2, l);
+        int m = height/aux;
+        int n = width/aux;
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
-        Mat kernel = createFilter(m,n,l*sigma);
+        Mat kernel = createFilter(m,n,sigma/aux);
         kernels.push_back(kernel);
     }
 
@@ -162,8 +183,8 @@ int main(int argc, char** argv){
 
     // center
     cv::Mat center(2,1,CV_64F);
-    center.at<double>(0,0)= ceil(height*0.5);
-    center.at<double>(1,0)= ceil(width*0.5);
+    center.at<double>(0,0)= height*0.5;
+    center.at<double>(1,0)= width*0.5;
     cout << "\n Centro: " << center << "\n" << endl;
 
     // Foveate
