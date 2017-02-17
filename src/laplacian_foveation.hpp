@@ -39,22 +39,12 @@ public:
 
         imageLapPyr.clear();
 
-//        double max_value=-std::numeric_limits<double>::max();
-
-//        for (int i = 0; i<= image.size().height; ++i){
-//              for (int j = 0; j<= image.size().width; ++j){
-//                if (image.at<double>(i,j) > max_value){
-//                    max_value=image.at<double>(i,j);
-
-//                }
-//            }
-//        }
 
         Mat currentImg = image;
         //// CONVERTER PARA CV_8UC3 PARA REPRESENTAR!!
-        //image.convertTo(image, CV_8UC3);
-        //imshow("IMAGE ", image);
-        //waitKey(500);
+//        image.convertTo(image, CV_8UC3);
+//        imshow("IMAGE ", image);
+//        waitKey(500);
 
 
         for (int l=0; l<levels; l++)
@@ -125,9 +115,13 @@ public:
         {
 
             // Kernel center - image coordinate
-            cv::Mat upper_left_kernel_corner=kernel_size/2.0-center;
+            cv::Mat upper_left_kernel_corner = kernel_size / 2.0 - center;
 
-            //cv::Mat bottom_right_kernel_corner=image_size-center+kernel_size/2.0;
+            //cout << "Conta: " << kernel_size / 2.0 - center << endl;
+            cout << "canto: " << upper_left_kernel_corner.at<int>(0,0) << " " << upper_left_kernel_corner.at<int>(1,0) << endl;
+            cout << "image size: " << image_size.at<int>(0,0) << " " << image_size.at<int>(1,0) << endl;
+
+            cv::Mat bottom_right_kernel_corner = image_size - center + kernel_size /2.0;
                        
 
             // encontrar roi no kernel
@@ -136,6 +130,7 @@ public:
                                      upper_left_kernel_corner.at<int>(1,0),
                                      image_size.at<int>(0,0),
                                      image_size.at<int>(1,0));
+
 
 //            cout << "Kernel roi rect " << kernel_roi_rect << endl;
 //            cout << "Image size : " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
@@ -163,11 +158,11 @@ public:
                 cv::Mat aux;
                 if(i!=0){
                     aux=center/(powf(2,i));
-                    cout << "aux: " << aux << endl;
+                    //cout << "aux (i!=0): " << aux << endl;
                 }
                 else{
                     aux=center;
-                    cout << "aux: " << aux << endl;
+                    //cout << "aux: " << aux << endl;
                 }
 
                 computeRois(aux,kernel_roi_rect,kernel_sizes[i],image_sizes[i]);
@@ -184,9 +179,11 @@ public:
 
                 aux_pyr.convertTo(aux_pyr,CV_64F);
 
-                cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
 
+                cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
+                cout << "boa multi" << endl;
                 result_roi.copyTo(aux_pyr);
+
 
                 foveated_image.convertTo(foveated_image,CV_64F);
 
@@ -194,13 +191,13 @@ public:
                 if(i==(levels-1)) {
 
                     add(foveated_image,aux_pyr,foveated_image);
-//                    cout << "tou no if " << endl;
-//                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
+                    //cout << "tou no if " << endl;
+                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
                 }
 
                 else {
-//                    cout << "tou no else" << endl;
-//                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
+                    //cout << "tou no else" << endl;
+                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
 
                     // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
                     pyrUp(foveated_image, foveated_image, Size(foveated_image.cols*2,foveated_image.rows*2));
@@ -210,7 +207,7 @@ public:
 
             }
             cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
-            //imwrite("files/Foveated/foveated_quarto.jpg", foveated_image);
+            imwrite("files/Foveated/foveated.jpg", foveated_image);
 
             foveated_image.convertTo(foveated_image, CV_8UC3);
             imshow("Foveated image", foveated_image);
