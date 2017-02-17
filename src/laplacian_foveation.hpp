@@ -137,9 +137,9 @@ public:
                                      image_size.at<int>(0,0),
                                      image_size.at<int>(1,0));
 
-            cout << "Kernel roi rect " << kernel_roi_rect << endl;
-            cout << "Image size : " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
-            cout << "Kernel size : " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
+//            cout << "Kernel roi rect " << kernel_roi_rect << endl;
+//            cout << "Image size : " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
+//            cout << "Kernel size : " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
         }
 
 
@@ -163,22 +163,23 @@ public:
                 cv::Mat aux;
                 if(i!=0){
                     aux=center/(powf(2,i));
+                    cout << "aux: " << aux << endl;
                 }
                 else{
                     aux=center;
+                    cout << "aux: " << aux << endl;
                 }
 
                 computeRois(aux,kernel_roi_rect,kernel_sizes[i],image_sizes[i]);
-                
 
                 // Multiplicar
                 cv::Mat aux_pyr;
                 imageLapPyr[i].copyTo(aux_pyr);
                 cv::Mat result_roi;
 
-                cout << "size aux_pyr " << aux_pyr.size() << "\n" << endl;
-                cout << "size kernel roi " << kernels[i](kernel_roi_rect).size() << "\n" << endl;
-                cout << "size result " << result_roi.size() << "\n" << endl;
+//                cout << "size aux_pyr " << aux_pyr.size() << "\n" << endl;
+//                cout << "size kernel roi " << kernels[i](kernel_roi_rect).size() << "\n" << endl;
+//                cout << "size result " << result_roi.size() << "\n" << endl;
 
 
                 aux_pyr.convertTo(aux_pyr,CV_64F);
@@ -193,13 +194,13 @@ public:
                 if(i==(levels-1)) {
 
                     add(foveated_image,aux_pyr,foveated_image);
-                    cout << "tou no if " << endl;
-                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
+//                    cout << "tou no if " << endl;
+//                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
                 }
 
                 else {
-                    cout << "tou no else" << endl;
-                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
+//                    cout << "tou no else" << endl;
+//                    cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
 
                     // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
                     pyrUp(foveated_image, foveated_image, Size(foveated_image.cols*2,foveated_image.rows*2));
@@ -209,7 +210,7 @@ public:
 
             }
             cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
-            //imwrite("files/Foveated/foveated_wc.jpg", foveated_image);
+            //imwrite("files/Foveated/foveated_quarto.jpg", foveated_image);
 
             foveated_image.convertTo(foveated_image, CV_8UC3);
             imshow("Foveated image", foveated_image);

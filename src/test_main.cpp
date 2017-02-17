@@ -56,17 +56,17 @@ Mat createFilter(int m, int n, int sigma){
 
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(y,x)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(y,x)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3f>(y,x)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3d>(y,x)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3d>(y,x)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
+            gkernel.at<Vec3d>(y,x)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
 
 //            gkernel.at<Vec3f>(y,x)[0] = 0.0;//*(1/(M_PI*s));
 //            gkernel.at<Vec3f>(y,x)[1] = 0.0;//*(1/(M_PI*s));
 //            gkernel.at<Vec3f>(y,x)[2] = 0.0;//*(1/(M_PI*s));
 
-            if(gkernel.at<Vec3f>(y,x)[0]>max_value)
+            if(gkernel.at<Vec3d>(y,x)[0]>max_value)
             {
-                max_value=gkernel.at<Vec3f>(y,x)[0];
+                max_value=gkernel.at<Vec3d>(y,x)[0];
             }
 
 //            if(sqrt((x-xc)*(x-xc)+(y-yc)*(y-yc))<100)
@@ -102,17 +102,17 @@ Mat createFilter(int m, int n, int sigma){
             //gkernel.at<double>(x,y) /= sum;
 
             // FOR 3 CHANNELS
-            gkernel.at<Vec3f>(y,x)[0] /= max_value;
-            gkernel.at<Vec3f>(y,x)[1] /= max_value;
-            gkernel.at<Vec3f>(y,x)[2] /= max_value;
+            gkernel.at<Vec3d>(y,x)[0] /= max_value;
+            gkernel.at<Vec3d>(y,x)[1] /= max_value;
+            gkernel.at<Vec3d>(y,x)[2] /= max_value;
 
-            gkernel.at<Vec3f>(y,x)[0] *= 20.0;
-            gkernel.at<Vec3f>(y,x)[1] *= 20.0;
-            gkernel.at<Vec3f>(y,x)[2] *= 20.0;
+//            gkernel.at<Vec3d>(y,x)[0] *= 20.0;
+//            gkernel.at<Vec3d>(y,x)[1] *= 20.0;
+//            gkernel.at<Vec3d>(y,x)[2] *= 20.0;
 
 
             if(abs(x-xc)<10&&abs(y-yc)<10)
-            std::cout << gkernel.at<Vec3f>(y,x)[0] << " "<< std::endl;
+            std::cout << gkernel.at<Vec3d>(y,x)[0] << " "<< std::endl;
 //            gkernel.at<Vec3f>(x,y)[0] = gkernel.at<Vec3f>(x,y)[0] / abs(gkernel.at<Vec3f>(x,y)[0] );
 //            gkernel.at<Vec3f>(x,y)[1] = gkernel.at<Vec3f>(x,y)[1] / abs(gkernel.at<Vec3f>(x,y)[1] );
 //            gkernel.at<Vec3f>(x,y)[2] = gkernel.at<Vec3f>(x,y)[2] / abs(gkernel.at<Vec3f>(x,y)[2] );
@@ -130,10 +130,10 @@ Mat createFilter(int m, int n, int sigma){
 //        }
 //    }
     ////CONVERTER PARA REPRESENTAR
-    gkernel.convertTo(gkernel, CV_8UC3);
+    //gkernel.convertTo(gkernel, CV_8UC3);
     imshow("Show kernel", gkernel.t());
-    waitKey(0);
-    gkernel.convertTo(gkernel, CV_64FC3);
+    waitKey(1000);
+    //gkernel.convertTo(gkernel, CV_64FC3);
 
     return gkernel;
 }
@@ -147,14 +147,14 @@ Mat createFilter(int m, int n, int sigma){
 int main(int argc, char** argv){
 
     // Initialization
-    int sigma = 10; // Fovea size: standard deviation
+    int sigma = 100; // Fovea size: standard deviation
     int levels = 5; // number of pyramid levels
 
     // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00000001.JPEG";   // load image
+    //string file = string(argv[1]) + "ILSVRC2012_val_00000003.JPEG";   // load image
     string file = string(argv[1]) + "quarto.jpg";
 
-    cv::Mat image = imread(file, -1);		 // Read image
+    cv::Mat image = imread(file, 1);		 // Read image
 
     int height = image.size().height;
     int width = image.size().width;
@@ -169,6 +169,8 @@ int main(int argc, char** argv){
 
     for (int l=0; l<levels; ++l){ // for each level
         float aux=powf(2, l);
+        //double aux=pow(2, l);
+
         int m = height/aux;
         int n = width/aux;
         cout << "m " << m << "\t" << "n " << n << endl;
