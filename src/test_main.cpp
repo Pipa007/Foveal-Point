@@ -139,7 +139,6 @@ Mat createFilter(int m, int n, int sigma){
 }
 
 
-
 /*****************************************/
 //		MAIN
 /*****************************************/
@@ -147,7 +146,7 @@ Mat createFilter(int m, int n, int sigma){
 int main(int argc, char** argv){
 
     // Initialization
-    int sigma = 50; // Fovea size: standard deviation  20 - 40 - 60
+    int sigma = 50; // Fovea size: standard deviation
     int levels = 5; // number of pyramid levels
 
     // read one image
@@ -164,6 +163,7 @@ int main(int argc, char** argv){
     //imshow("Input Image ", image);
     //waitKey(1500);
 
+
     image.convertTo(image, CV_64F);
     std::vector<Mat> kernels;
 
@@ -171,8 +171,8 @@ int main(int argc, char** argv){
         float aux=powf(2, l);
         //double aux=pow(2, l);
 
-        int m = height/aux; // height*4/aux;
-        int n = width/aux;  // width*4/aux;
+        int m = round(4.0*height/aux); // height*4/aux;
+        int n = round(4.0*width/aux);  // width*4/aux;
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
@@ -184,13 +184,17 @@ int main(int argc, char** argv){
     LaplacianBlending pyramid(image,levels, kernels); //  instantiate an object
 
     // center
-    cv::Mat center(2,1,CV_64F);
-    center.at<double>(0,0)= height*0.5;
-    center.at<double>(1,0)= width*0.5;
-    cout << "\n O meu centro é: " << center << "\n" << endl;
+    cv::Mat center(2,1,CV_32S);
+    center.at<int>(0,0)= height*0.75;
+    center.at<int>(1,0)= width*0.25;
 
     // Foveate
-    pyramid.foveate(center);
+    cv::Mat foveated_image=pyramid.foveate(center);
+
+    foveated_image.convertTo(foveated_image, CV_8UC3);
+    imshow("Foveated image", foveated_image);
+    waitKey(2000);
+
 
 }
 
