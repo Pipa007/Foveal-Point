@@ -39,38 +39,21 @@ public:
 
         imageLapPyr.clear();
 
-
         Mat currentImg = image;
-        //// CONVERTER PARA CV_8UC3 PARA REPRESENTAR!!
-//        image.convertTo(image, CV_8UC3);
-//        imshow("IMAGE ", image);
-//        waitKey(500);
-
 
         for (int l=0; l<levels; l++)
         {
             Mat image;
             pyrDown(currentImg, down);
 
-            //imshow("IMAGE ", currentImg);
-            //waitKey(1500);
-
-            //imshow("PYRDOWN", down);
-            //waitKey(1500);
             pyrUp(down, up, currentImg.size());
-
-            //imshow("PYRUP", up);
-            //waitKey(1500);
 
             Mat lap = currentImg - up;
             
             imageLapPyr[l]=lap;
+            cout << "Laps " << imageLapPyr[l].size() << endl;
             
             currentImg = down;
-
-            //imshow("Laplaciano", lap);
-            //waitKey(1500);
-            //cout << "Level " << l << endl;
         }
         
         imageSmallestLevel=up;
@@ -83,7 +66,6 @@ public:
         image(_image),levels(_levels), kernels(_kernels)
         {
 
-            //image.convertTo(image,CV_64F);
             imageLapPyr.resize(levels);
             foveatedPyr.resize(levels);
 
@@ -94,13 +76,13 @@ public:
 
             for(int i=levels-1; i>=0;--i){
 
-                cv::Mat image_size(2,1,CV_32S); // CV_32S
+                cv::Mat image_size(2,1,CV_32S);
                 
                 image_size.at<int>(0,0)=imageLapPyr[i].cols;
                 image_size.at<int>(1,0)=imageLapPyr[i].rows;
                 image_sizes[i]=image_size;
                 
-                cv::Mat kernel_size(2,1,CV_32S); // CV_32S
+                cv::Mat kernel_size(2,1,CV_32S);
                 
                 kernel_size.at<int>(0,0)=kernels[i].cols;
                 kernel_size.at<int>(1,0)=kernels[i].rows;
@@ -117,13 +99,6 @@ public:
             // Kernel center - image coordinate
             cv::Mat upper_left_kernel_corner = (kernel_size) / 2.0 - center;
 
-            //cout << "Conta: " << kernel_size / 2.0 - center << endl;
-            cout << "Upper Left Corner: " << upper_left_kernel_corner.at<int>(0,0) << " " << upper_left_kernel_corner.at<int>(1,0) << endl;
-            cout << "image size: " << image_size.at<int>(0,0) << " " << image_size.at<int>(1,0) << endl;
-            cout << "kernel size: " << kernel_size.at<int>(0,0) << " " << kernel_size.at<int>(1,0) << endl;
-
-            //cv::Mat bottom_right_kernel_corner = image_size - center + kernel_size /2.0;
-                       
 
             // encontrar roi no kernel
             // cv::Rect take (upper left corner, width, heigth)
@@ -131,13 +106,7 @@ public:
                                      upper_left_kernel_corner.at<int>(1,0),
                                      image_size.at<int>(0,0),
                                      image_size.at<int>(1,0));
-
-
-            cout << "Kernel roi rect " << kernel_roi_rect << endl;
-//            cout << "Image size After ROI: " << image_size.at<int>(0,0) << "\t" << image_size.at<int>(1,0) << endl;
-//            cout << "Kernel size After ROI: " << kernel_size.at<int>(0,0) << "\t" << kernel_size.at<int>(1,0) << endl;
-        }
-
+            }
 
 
         
@@ -160,13 +129,13 @@ public:
                 cv::Mat aux;
                 if(i!=0){
                     aux=center/(powf(2,i));
-                    //cout << "aux (i!=0): " << aux << endl;
+
                 }
                 else{
                     aux=center;
-                    //cout << "aux: " << aux << endl;
-                }
 
+                }
+                cout << "aux: " << aux << endl;
                 computeRois(aux,kernel_roi_rect,kernel_sizes[i],image_sizes[i]);
 
                 // Multiplicar
@@ -176,7 +145,7 @@ public:
 
 
                 cv::multiply(aux_pyr,kernels[i](kernel_roi_rect),result_roi,1.0);
-                //cout << "boa multi" << endl;
+
                 result_roi.copyTo(aux_pyr);
 
 
@@ -186,27 +155,19 @@ public:
                 if(i==(levels-1)) {
 
                     add(foveated_image,aux_pyr,foveated_image);
-
-                    //cout << "tou no if " << endl;
-                    //cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
                 }
 
                 else {
-                    //cout << "tou no else" << endl;
-                   // cout << "Foveated image size" << foveated_image.size() << "\n" << endl;
 
                     // pyrUp( tmp, dst, Size( tmp.cols*2, tmp.rows*2 ) )
-                    pyrUp(foveated_image, foveated_image, Size(foveated_image.cols*2,foveated_image.rows*2));
+                    pyrUp(foveated_image, foveated_image,Size(image_sizes[i].at<int>(0,0),image_sizes[i].at<int>(1,0)));
+                    cout << "Size " << Size(foveated_image.cols*2,foveated_image.rows*2) << aux_pyr.size() << endl;
 
                     cv::add(foveated_image,aux_pyr,foveated_image);
-
+                    cout << "erro" << endl;
                 }
 
             }
-            cout << "FINAL: Foveated image size" << foveated_image.size() << "\n" << endl;
-            imwrite("files/Foveated/foveated.jpg", foveated_image);
-
-
 
             return foveated_image;
         }

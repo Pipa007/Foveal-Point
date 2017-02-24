@@ -27,6 +27,8 @@ using std::string;
 /*****************************************/
 //                  FUNCTIONS
 /*****************************************/
+
+
 Mat createFilter(int m, int n, int sigma){
 
 
@@ -44,101 +46,59 @@ Mat createFilter(int m, int n, int sigma){
 
         for(int y = 0; y < m; ++y) {
 
-            //r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
-            //gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
-
             ry = ((y-yc)*(y-yc));
 
-
-            // FOR ONE CHANNEL
-//            kernel.at<double>(x,y) = exp(-(rx + ry)/s)*(1/(M_PI*s));
-//            sum += kernel.at<double>(x,y);
-
-
             // FOR 3 CHANNELS
-            gkernel.at<Vec3d>(y,x)[0] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3d>(y,x)[1] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-            gkernel.at<Vec3d>(y,x)[2] = exp(-(rx + ry)/s);//*(1/(M_PI*s));
-
-//            gkernel.at<Vec3f>(y,x)[0] = 0.0;//*(1/(M_PI*s));
-//            gkernel.at<Vec3f>(y,x)[1] = 0.0;//*(1/(M_PI*s));
-//            gkernel.at<Vec3f>(y,x)[2] = 0.0;//*(1/(M_PI*s));
+            gkernel.at<Vec3d>(y,x)[0] = exp(-(rx + ry)/s);
+            gkernel.at<Vec3d>(y,x)[1] = exp(-(rx + ry)/s);
+            gkernel.at<Vec3d>(y,x)[2] = exp(-(rx + ry)/s);
 
             if(gkernel.at<Vec3d>(y,x)[0]>max_value)
             {
                 max_value=gkernel.at<Vec3d>(y,x)[0];
             }
 
-//            if(sqrt((x-xc)*(x-xc)+(y-yc)*(y-yc))<100)
-//            {
-//                gkernel.at<Vec3f>(y,x)[0] = 1.0;//*(1/(M_PI*s));
-//                gkernel.at<Vec3f>(y,x)[1] = 1.0;//*(1/(M_PI*s));
-//                gkernel.at<Vec3f>(y,x)[2] = 1.0;//*(1/(M_PI*s));
-//            }
-//            else
-//            {
-//                gkernel.at<Vec3f>(y,x)[0] = 0.0;//*(1/(M_PI*s));
-//                gkernel.at<Vec3f>(y,x)[1] = 0.0;//*(1/(M_PI*s));
-//                gkernel.at<Vec3f>(y,x)[2] = 0.0;//*(1/(M_PI*s));
-//           }
-
-            //std::cout << -(rx + ry)/s <<  " " ;
-
-
-
-
         }
     }
-
-    //std::cout << max_value << std::endl;
-    //imshow("Show kernel", gkernel);
-    //waitKey(2000);
 
 
     // normalize the Kernel
     for(int x = 0; x < n; ++x){
         for(int y = 0; y < m; ++y){
-            // FOR ONE CHANNEL
-            //gkernel.at<double>(x,y) /= sum;
 
             // FOR 3 CHANNELS
             gkernel.at<Vec3d>(y,x)[0] /= max_value;
             gkernel.at<Vec3d>(y,x)[1] /= max_value;
             gkernel.at<Vec3d>(y,x)[2] /= max_value;
 
-//            gkernel.at<Vec3d>(y,x)[0] *= 20.0;
-//            gkernel.at<Vec3d>(y,x)[1] *= 20.0;
-//            gkernel.at<Vec3d>(y,x)[2] *= 20.0;
-
-
-//            if(abs(x-xc)<10&&abs(y-yc)<10)
-//            std::cout << gkernel.at<Vec3d>(y,x)[0] << " "<< std::endl;
-////            gkernel.at<Vec3f>(x,y)[0] = gkernel.at<Vec3f>(x,y)[0] / abs(gkernel.at<Vec3f>(x,y)[0] );
-////            gkernel.at<Vec3f>(x,y)[1] = gkernel.at<Vec3f>(x,y)[1] / abs(gkernel.at<Vec3f>(x,y)[1] );
-////            gkernel.at<Vec3f>(x,y)[2] = gkernel.at<Vec3f>(x,y)[2] / abs(gkernel.at<Vec3f>(x,y)[2] );
-
          }
     }
-
-
-
-//    for (int x = 0; x < m; ++x) {
-//        for(int y = 0; y < n; ++y) {
-
-//            cout << kernel.at<double>(x,y);
-//            cout << "\t" <<endl;
-//        }
-//    }
-
-//    //gkernel.convertTo(gkernel, CV_8UC3);
-//    imshow("Show kernel", gkernel);    // tirei o transposto
-//    waitKey(1000);
-//    //gkernel.convertTo(gkernel, CV_64FC3);
 
     return gkernel;
 }
 
 
+std::vector<Mat> createFilterPyr(int m, int n, int levels, int sigma){
+
+    std::vector<Mat> kernels;
+    Mat gkernel=createFilter(m,n,sigma);
+    kernels.push_back(gkernel);
+
+    std::cout << "OI"<< std::endl;
+
+    for (int l=0; l<levels; ++l)
+    {
+        Mat kernel_down;
+        std::cout << "OI"<<l<< std::endl;
+
+        pyrDown(kernels[l], kernel_down);
+        std::cout << "sizes: "<< kernels[l].size() << std::endl;
+        kernels.push_back(kernel_down);
+
+    }
+    return kernels;
+
+}
 /*****************************************/
 //		MAIN
 /*****************************************/
@@ -150,8 +110,8 @@ int main(int argc, char** argv){
     int levels = 5; // number of pyramid levels
 
     // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00000003.JPEG";   // load image
-    string file = string(argv[1]) + "wc.jpg";
+    string file = string(argv[1]) + "ILSVRC2012_val_00000001.JPEG";   // load image
+    //string file = string(argv[1]) + "wc.jpg";
 
     cv::Mat image = imread(file, 1);		 // Read image
 
@@ -163,37 +123,40 @@ int main(int argc, char** argv){
     //imshow("Input Image ", image);
     //waitKey(1500);
 
+    int m = floor(4.0*height);
+    int n = floor(4.0*width);
 
     image.convertTo(image, CV_64F);
-    std::vector<Mat> kernels;
+    std::vector<Mat> kernels=createFilterPyr(m,n,levels,sigma);
 
-    for (int l=0; l<levels; ++l){ // for each level
+    /*for (int l=0; l<levels; ++l){ // for each level
         float aux=powf(2, l);
-        //double aux=pow(2, l);
 
-        int m = round(4.0*height/aux); // height*4/aux;
-        int n = round(4.0*width/aux);  // width*4/aux;
+        int m = floor(4.0*height/aux);
+        int n = floor(4.0*width/aux);
+
         cout << "m " << m << "\t" << "n " << n << endl;
 
         // Build Kernel
         Mat kernel = createFilter(m,n,sigma/aux);
         kernels.push_back(kernel);
-    }
+    }*/
 
     // Construct pyramid
     LaplacianBlending pyramid(image,levels, kernels); //  instantiate an object
 
     // center
     cv::Mat center(2,1,CV_32S);
-    center.at<int>(0,0)= height*0.75;
-    center.at<int>(1,0)= width*0.25;
+    center.at<int>(0,0)= height*0.25;
+    center.at<int>(1,0)= width*0.1;
+    cout << "center: " << center << endl;
 
     // Foveate
-    cv::Mat foveated_image=pyramid.foveate(center);
+    cv::Mat foveated_image = pyramid.foveate(center);
 
     foveated_image.convertTo(foveated_image, CV_8UC3);
     imshow("Foveated image", foveated_image);
-    waitKey(2000);
+    waitKey(0);
 
 
 }
