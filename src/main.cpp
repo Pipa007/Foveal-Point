@@ -22,62 +22,7 @@ using namespace cv;
 using namespace std;
 using std::string;
 
-
-
-/*****************************************/
-//                  FUNCTIONS
-/*****************************************/
-Mat createFilter(int m, int n, int sigma){
-
-    Mat gkernel(m,n,CV_64F);
-
-    double sum = 0.0;  // for normalization
-    double r,rx, ry, s = 2.0 * sigma * sigma;
-
-    double xc= floor(m*0.5);
-    double yc= floor(n*0.5);
-
-    for (int x = 0; x < m; ++x) {
-
-        for(int y = 0; y < n; ++y) {
-
-            //r = sqrt((x-xc)*(x-xc) + (y-yc)*(y-yc));
-            //gkernel.at<double>(x,y) = (exp(-(r*r)/s))/(M_PI * s);
-
-            rx = ((x-xc)*(x-xc));
-            ry = ((y-yc)*(y-yc));
-
-            //gkernel.at<double>(x,y) = (1/sqrt(M_PI*s))*exp((rx + ry)/s);
-
-            gkernel.at<double>(x,y) = exp(-(rx + ry)/s); // *(1/(M_PI*s))
-            sum += gkernel.at<double>(x,y);
-        }
-    }
-
-    imshow("Show kernel", gkernel);
-    waitKey(1000);
-
-    // normalize the Kernel
-    for(int x = 0; x < m; ++x)
-        for(int y = 0; y < n; ++y)
-            gkernel.at<double>(x,y) /= sum;
-
-
-//    for (int x = 0; x < m; ++x) {
-//        for(int y = 0; y < n; ++y) {
-
-//            cout << gkernel.at<double>(x,y);
-//            cout << "\t" <<endl;
-//        }
-//    }
-
-//    imshow("Show kernel", gkernel);
-//    waitKey(2000);
-
-
-    return gkernel;
-}
-
+#define CV_64FC3 CV_MAKETYPE(CV_64F,3)
 
 
 /*****************************************/
@@ -87,48 +32,40 @@ Mat createFilter(int m, int n, int sigma){
 int main(int argc, char** argv){
 
     // Initialization
-    int sigma = 10; // Fovea size: standard deviation
+    int sigma = 50; // Fovea size: standard deviation
     int levels = 5; // number of pyramid levels
 
-    // read one image
-    //string file = string(argv[1]) + "ILSVRC2012_val_00003.JPEG";   // load image
-    string file = string(argv[1]) + "quarto.jpg";
+    string file = string(argv[1]) + "ILSVRC2012_val_00000001.JPEG";   // load image
+    //string file = string(argv[1]) + "wc.jpg";
 
-    Mat image = imread(file, -1);		 // Read image
-    cout << sizeof(image) << endl;
-    //cv::normalize(image, image,1,0,NORM_MINMAX);
+    cv::Mat image = imread(file, 1);		 // Read image
 
     int height = image.size().height;
     int width = image.size().width;
 
-    cout << "Height: " << height << endl;
-    cout << "Width: " << width << endl;
+    int m = floor(4.0*height);
+    int n = floor(4.0*width);
 
+    image.convertTo(image, CV_64F);
 
-    std::vector<Mat> kernels;
-
-    for (int l=0; l<levels; ++l){ // for each level
-
-        int m = height/(powf(2, l));
-        int n = width/(powf(2, l));
-        cout << "m " << m << "\t" << "n " << n << endl;
-
-        // Build Kernel
-        Mat kernel = createFilter(m,n,l*sigma);
-        kernels.push_back(kernel);
-    }
+    // Compute kernels
+    std::vector<Mat> kernels=createFilterPyr(m,n,levels,sigma);
 
     // Construct pyramid
     LaplacianBlending pyramid(image,levels, kernels); //  instantiate an object
 
     // center
-    cv::Mat center(2,1,CV_64F);
-    center.at<double>(0,0)= height*0.5;
-    center.at<double>(1,0)= width*0.5;
-    cout << "\n Centro: " << center << "\n" << endl;
+    cv::Mat center(2,1,CV_32S);
+    center.at<int>(0,0)= height*0.25;
+    center.at<int>(1,0)= width*0.25;
 
     // Foveate
-    pyramid.foveate(center);
+    cv::Mat foveated_image = pyramid.foveate(center);
+
+//    foveated_image.convertTo(foveated_image, CV_8UC3);
+//    imshow("Foveated image", foveated_image);
+//    waitKey(1000);
+
 
 }
 
